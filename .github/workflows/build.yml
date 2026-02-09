@@ -4,46 +4,48 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Clang
+      - name: Install Dependencies
         run: |
-          mkdir -p clang
-          cd clang
-          # Качаем проверенный Proton Clang - он лучше всего подходит для ядер Xiaomi
-          git clone https://github.com/kdrag0n/proton-clang.git --depth=1 bin
-          
+          sudo apt-get update
+          sudo apt-get install -y bc build-essential zip gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi libssl-dev libncurses5-dev flex bison clang lld llvm
+
       - name: Build Kernel
         run: |
-          export PATH=$(pwd)/clang/bin/bin:$PATH
+          # Создаем папку для вывода
+          mkdir -p out
+          
+          # Основные переменные сборки
           export ARCH=arm64
           export SUBARCH=arm64
           export KBUILD_BUILD_USER="Elite"
           export KBUILD_BUILD_HOST="Spes-Lab"
           
-          # Указываем путь к компилятору явно
-          CLANG=$(pwd)/clang/bin/bin/clang
-          
+          # 1. Конфигурация
           make O=out ARCH=arm64 vendor/spes_defconfig
           
+          # 2. Сама сборка с использованием системного Clang и LLD
           make -j$(nproc --all) O=out \
                       ARCH=arm64 \
-                      CC=$CLANG \
+                      CC=clang \
+                      CLANG_TRIPLE=aarch64-linux-gnu- \
                       CROSS_COMPILE=aarch64-linux-gnu- \
                       CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+                      LD=ld.lld \
                       AR=llvm-ar \
                       NM=llvm-nm \
                       OBJCOPY=llvm-objcopy \
                       OBJDUMP=llvm-objdump \
                       STRIP=llvm-strip \
-                      LD=ld.lld \
                       LLVM=1 \
                       LLVM_IAS=1 \
-                      KCFLAGS="-w"
-                      
+                      KCFLAGS="-w" \
+                      HOSTCFLAGS="-w" \
+                      HOSTLDFLAGS="-fuse-ld=lld"
 
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
