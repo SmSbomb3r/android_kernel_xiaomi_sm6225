@@ -20,13 +20,18 @@ jobs:
           export SUBARCH=arm64
           export KBUILD_BUILD_USER="Elite"
           export KBUILD_BUILD_HOST="Spes-Lab"
-          
-          # Очистка и создание конфига
+
+          # КОРРЕКЦИЯ GPU: Выставляем 1175 МГц перед сборкой
+          # Мы ищем файл dtsi для графики и меняем максимальный уровень на 1175000000 Гц
+          find arch/arm64/boot/dts/vendor/qcom/ -name "*gpu*.dtsi" -exec sed -i 's/qcom,gpu-pwrlevel-bin = <0>/qcom,gpu-pwrlevel-bin = <1175000000>/g' {} +
+          find arch/arm64/boot/dts/vendor/qcom/ -name "*gpu*.dtsi" -exec sed -i 's/opp-hz = \/bits\/ 64 <[0-9]*>/opp-hz = \/bits\/ 64 <1175000000>/' {} +
+
+          # Очистка и конфигурация
           make clean
           make mrproper
           make vendor/spes_defconfig
           
-          # Запуск сборки без внешней папки (так надежнее)
+          # Сама сборка
           make -j2 -k \
                       ARCH=arm64 \
                       CC=clang \
