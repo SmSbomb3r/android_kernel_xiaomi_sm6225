@@ -20,12 +20,8 @@ jobs:
           export SUBARCH=arm64
           make O=out ARCH=arm64 vendor/spes_defconfig
           make O=out ARCH=arm64 olddefconfig
-          make O=out ARCH=arm64 CC=clang \
-          CROSS_COMPILE=aarch64-linux-gnu- \
-          NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip \
-          KCFLAGS="-w" \
-          CLANG_FLAGS="-w" \
-          -j$(nproc)
+          make O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip -j$(nproc) KCFLAGS="-w" CLANG_FLAGS="-w" KCPPFLAGS="-w"
+          
 
           
           
