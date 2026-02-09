@@ -9,42 +9,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Build Environment
+      - name: Setup Clang
         run: |
-          sudo apt-get update
-          sudo apt-get install -y bc build-essential zip gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi libssl-dev libncurses5-dev flex bison
-
-      - name: Download Clang
-        run: |
-          mkdir clang
+          mkdir -p clang
           cd clang
-          curl -L https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r416183b1.tar.gz -o clang.tar.gz
-          tar -xf clang.tar.gz
-
+          # Качаем проверенный Proton Clang - он лучше всего подходит для ядер Xiaomi
+          git clone https://github.com/kdrag0n/proton-clang.git --depth=1 bin
+          
       - name: Build Kernel
         run: |
-          export PATH=$(pwd)/clang/bin:$PATH
+          export PATH=$(pwd)/clang/bin/bin:$PATH
           export ARCH=arm64
           export SUBARCH=arm64
           export KBUILD_BUILD_USER="Elite"
           export KBUILD_BUILD_HOST="Spes-Lab"
           
+          # Указываем путь к компилятору явно
+          CLANG=$(pwd)/clang/bin/bin/clang
+          
           make O=out ARCH=arm64 vendor/spes_defconfig
           
           make -j$(nproc --all) O=out \
                       ARCH=arm64 \
-                      CC=clang \
+                      CC=$CLANG \
                       CROSS_COMPILE=aarch64-linux-gnu- \
                       CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+                      AR=llvm-ar \
                       NM=llvm-nm \
                       OBJCOPY=llvm-objcopy \
                       OBJDUMP=llvm-objdump \
                       STRIP=llvm-strip \
-                      AR=llvm-ar \
                       LD=ld.lld \
                       LLVM=1 \
                       LLVM_IAS=1 \
                       KCFLAGS="-w"
+                      
 
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
