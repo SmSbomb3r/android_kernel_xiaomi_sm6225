@@ -143,7 +143,7 @@
 		qcom,gpubw-dev = <&gpubw>;
 		qcom,bus-control;
 		qcom,msm-bus,name = "grp3d";
-		qcom,msm-bus,num-cases = <12>;
+		qcom,msm-bus,num-cases = <13>;
 		qcom,msm-bus,num-paths = <1>;
 		qcom,msm-bus,vectors-KBps =
 			<26 512 0 0>,
@@ -157,7 +157,8 @@
 			<26 512 0 8136000>,   /*  8 bus=1017 (SVS_L1)  */
 			<26 512 0 10824000>,  /*  9 bus=1353 (NOM)     */
 			<26 512 0 12440000>,  /* 10 bus=1555 (NOM)     */
-			<26 512 0 14432000>;  /* 11 bus=1804 (TURBO)   */
+			<26 512 0 14432000>,  /* 11 bus=1804 (TURBO)   */
+            <26 512 0 19200000>;  /* 12 bus=2400 (ELITE) */
 
 		/* GDSC regulator names */
 		regulator-names = "vddcx", "vdd";
