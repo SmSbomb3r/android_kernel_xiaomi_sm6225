@@ -18,9 +18,13 @@ jobs:
         run: |
           export ARCH=arm64
           export SUBARCH=arm64
+          # 1. Загружаем конфиг
           make O=out ARCH=arm64 vendor/spes_defconfig
-          # Добавляем KCFLAGS="-Wno-error", чтобы игнорировать мелкие придирки компилятора
+          # 2. АВТОМАТИЧЕСКИ отвечаем "по умолчанию" на все новые вопросы (ВАЖНО!)
+          make O=out ARCH=arm64 olddefconfig
+          # 3. Запускаем саму сборку
           make O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip KCFLAGS="-Wno-error" -j$(nproc)
+          
           
      
       - name: Upload Kernel Image
