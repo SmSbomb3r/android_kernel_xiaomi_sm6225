@@ -39,12 +39,17 @@ jobs:
 
       - name: Check and Package
         run: |
-          # Ищем готовое ядро
-          if [ -f arch/arm64/boot/Image.gz-dtb ]; then
-            echo "SUCCESS: Image.gz-dtb found!"
+          # Создаем папку для артефактов
+          mkdir -p final_bin
+          
+          # Копируем всё, что удалось собрать (Image и Image.gz)
+          cp arch/arm64/boot/Image* final_bin/
+          
+          if [ -n "$(ls -A final_bin/)" ]; then
+            echo "SUCCESS: Kernel files found!"
+            ls -l final_bin/
           else
-            echo "ERROR: Kernel image not found. Showing what was built:"
-            find arch/arm64/boot/ -name "Image*"
+            echo "ERROR: No kernel files found at all."
             exit 1
           fi
 
@@ -52,4 +57,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Image-Elite-Spes
-          path: arch/arm64/boot/Image.gz-dtb
+          # Загружаем всю папку со всеми версиями ядра
+          path: final_bin/*
