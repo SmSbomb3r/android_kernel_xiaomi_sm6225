@@ -16,19 +16,18 @@ jobs:
 
       - name: Build Kernel
         run: |
-          mkdir -p out
           export ARCH=arm64
           export SUBARCH=arm64
+          export KBUILD_BUILD_USER="Elite"
+          export KBUILD_BUILD_HOST="Spes-Lab"
           
-          # Очистка
-          make O=out ARCH=arm64 clean
-          make O=out ARCH=arm64 mrproper
+          # Очистка и создание конфига
+          make clean
+          make mrproper
+          make vendor/spes_defconfig
           
-          # Конфигурация
-          make O=out ARCH=arm64 vendor/spes_defconfig
-          
-          # Сборка с игнорированием несоответствий секций и подробным логом
-          make -j2 -k O=out \
+          # Запуск сборки без внешней папки (так надежнее)
+          make -j2 -k \
                       ARCH=arm64 \
                       CC=clang \
                       CLANG_TRIPLE=aarch64-linux-gnu- \
@@ -36,14 +35,21 @@ jobs:
                       CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
                       CONFIG_SECTION_MISMATCH_WARN_ONLY=y \
                       KCFLAGS="-w" \
-                      HOSTCFLAGS="-w" \
-                      V=1 || true
-                      
-                      
+                      HOSTCFLAGS="-w" || true
+
+      - name: Check and Package
+        run: |
+          # Ищем готовое ядро
+          if [ -f arch/arm64/boot/Image.gz-dtb ]; then
+            echo "SUCCESS: Image.gz-dtb found!"
+          else
+            echo "ERROR: Kernel image not found. Showing what was built:"
+            find arch/arm64/boot/ -name "Image*"
+            exit 1
+          fi
 
       - name: Upload Kernel
         uses: actions/upload-artifact@v4
         with:
           name: Image-Elite-Spes
-          path: out/arch/arm64/boot/Image.gz-dtb
-          
+          path: arch/arm64/boot/Image.gz-dtb
