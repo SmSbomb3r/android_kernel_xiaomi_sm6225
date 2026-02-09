@@ -1,0 +1,31 @@
+name: Build S680 Elite Kernel
+on:
+  workflow_dispatch: # Позволяет запустить сборку вручную кнопкой
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison flex libssl-dev libelf-dev clang lld llvm make python3 gcc-aarch64-linux-gnu
+
+      - name: Compile Kernel
+        run: |
+          export ARCH=arm64
+          export SUBARCH=arm64
+          # Создаем конфиг (для Redmi Note 11 это spes_defconfig)
+          make O=out ARCH=arm64 spes_defconfig
+          # Запускаем компиляцию
+          make O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip -j$(nproc)
+
+      - name: Upload Kernel Image
+        uses: actions/upload-artifact@v4
+        with:
+          name: S680-Elite-Kernel
+          path: out/arch/arm64/boot/Image.gz-dtb
+          
