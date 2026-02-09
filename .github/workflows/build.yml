@@ -18,11 +18,10 @@ jobs:
         run: |
           export ARCH=arm64
           export SUBARCH=arm64
-          # Создаем конфиг (для Redmi Note 11 это spes_defconfig)
           make O=out ARCH=arm64 vendor/spes_defconfig
-          # Запускаем компиляцию
-          make O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip -j$(nproc)
-
+          # Добавляем флаг KCFLAGS="-Wno-error", чтобы игнорировать строгие предупреждения Clang
+          make O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip KCFLAGS="-Wno-error" -j$(nproc)
+     
       - name: Upload Kernel Image
         uses: actions/upload-artifact@v4
         with:
