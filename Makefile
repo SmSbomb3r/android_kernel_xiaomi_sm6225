@@ -2,8 +2,8 @@
 VERSION = 4
 PATCHLEVEL = 19
 SUBLEVEL = 157
-EXTRAVERSION =
-NAME = "People's Front"
+EXTRAVERSION = -S680-Elite
+NAME = "Snapdragon 680 Elite"
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
